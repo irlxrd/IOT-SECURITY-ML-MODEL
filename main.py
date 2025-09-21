@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
 
 # FILE PATHS
 FILEPATH = "conn.log.labeled"
@@ -81,15 +84,37 @@ df = pd.get_dummies(df, columns=cat_cols)
 df.to_csv(OUTPUT_CSV, index=False)
 
 # Define feature columns and target variable
-feature_cols = [
-    'src_port', 'dst_port', 'duration', 'src_bytes', 'dst_bytes', 
-    'src_pkts', 'dst_pkts','proto_tcp', 'proto_udp', 'state_OTH', 
-    'state_RSTR', 'state_S0', 'state_S1', 'state_S3', 'state_SF'
-]
-
-X = df[feature_cols]
+X = df.drop(['label', 'label_enc'], axis=1)
 y = df['label_enc']
 
-print(X.head())
-print(y.head())
+# Train and test datasets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+# Logistic Regression model
+lr = LogisticRegression(multi_class='multinomial', max_iter=1000)
+lr.fit(X_train, y_train)
+print("Logistic Regression accuracy:", lr.score(X_test, y_test))
+
+# Analyze Logistic Regression coefficients
+importances_lr = pd.DataFrame({'feature': X.columns, 'coefficient': lr.coef_[0]})
+print("\nLogistic Regression feature importances (coefficients):")
+print(importances_lr.sort_values('coefficient', key=abs, ascending=False))
+
+# Decision Tree model
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+import matplotlib.pyplot as plt
+
+dt = DecisionTreeClassifier(max_depth=3, random_state=42)
+dt.fit(X_train, y_train)
+print("\nDecision Tree accuracy:", dt.score(X_test, y_test))
+
+# Decision Tree feature importances
+importances_dt = pd.DataFrame({'feature': X.columns, 'importance': dt.feature_importances_})
+print("\nDecision Tree feature importances:")
+print(importances_dt.sort_values('importance', ascending=False))
+
+# Visualize the Decision Tree
+plt.figure(figsize=(16, 8))
+plot_tree(dt, feature_names=X.columns, class_names=[str(c) for c in y.unique()], filled=True)
+plt.title("Decision Tree Visualization (max_depth=3)")
+plt.show()
