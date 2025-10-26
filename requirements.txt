@@ -1,0 +1,10 @@
+# Minimal requirements for this project
+pandas
+numpy
+scikit-learn
+matplotlib
+joblib
+flask
+requests
+xgboost
+seaborn

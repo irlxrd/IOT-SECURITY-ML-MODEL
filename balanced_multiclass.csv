@@ -44999,7 +44999,6 @@ src_port,dst_port,proto,duration,src_bytes,dst_bytes,src_pkts,dst_pkts,state,lab
 41735,27015,udp,294.772628,5575,0,223,0,S0,DDoS
 52457,27015,udp,294.444743,5600,0,224,0,S0,DDoS
 18986,27015,udp,293.681219,5350,0,214,0,S0,DDoS
-52318,22,tcp,368.758327,272,120888,1301,1462,SF,FileDownload
 14254,37215,tcp,-,-,-,1,0,S0,Okiru
 53245,37215,tcp,-,-,-,1,0,S0,Okiru
 51476,37215,tcp,-,-,-,1,0,S0,Okiru
