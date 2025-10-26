@@ -24,7 +24,7 @@ The project uses the **IoT-23 dataset**, which contains labeled network traffic 
 
 ```
 project/
-├── collect_c&c.py
+├── balance_iot23.py
 ├── train_models.py
 ├── balanced_multiclass.csv
 ├── web_app/
@@ -46,7 +46,7 @@ project/
 
 ## Files Description
 
-### collect_c&c.py
+### balance_iot23.py
 
 Data collection and preprocessing script that:
 
@@ -73,7 +73,7 @@ Machine learning pipeline that:
 Install required dependencies:
 
 ```bash
-pip install pandas numpy scikit-learn matplotlib seaborn xgboost joblib
+pip install requirements.txt
 ```
 
 ## Usage
@@ -81,7 +81,7 @@ pip install pandas numpy scikit-learn matplotlib seaborn xgboost joblib
 ### Step 1: Data Collection
 
 ```bash
-python collect_c&c.py
+python balance_iot23.py
 ```
 
 This will create `balanced_multiclass.csv` with approximately 285k balanced samples.
@@ -125,20 +125,6 @@ All models achieve near-perfect classification accuracy (>99%) due to:
 | XGBoost | ~100% |
 | MLP | ~98-99% |
 
-## Visualizations
-
-The training script generates 7 comprehensive visualizations:
-
-1. **Feature Importance Comparison** - Top features across tree-based models
-2. **Model Accuracy Comparison** - Bar chart comparing all models
-3. **Confusion Matrices** - Heatmaps for each model showing prediction errors
-4. **Per-Class Metrics** - Precision, Recall, and F1-Score by class
-5. **ROC Curves** - One-vs-Rest ROC curves for multiclass classification
-6. **Learning Curve** - Training vs validation performance
-7. **Decision Tree** - Visual representation of a single tree from Random Forest
-
-All plots are saved in the `plots/` directory.
-
 ## Features
 
 The models use network flow features including:
@@ -151,35 +137,5 @@ The models use network flow features including:
 
 Categorical features (`proto`, `state`) are one-hot encoded, and missing values are handled appropriately.
 
-## Requirements
-
-- Python 3.7+
-- pandas
-- numpy
-- scikit-learn
-- matplotlib
-- seaborn
-- xgboost
-- joblib
-
-## Future Improvements
-
-- Real-time traffic classification
-- Deep learning models (LSTM, CNN)
-- Feature selection optimization
-- Model ensemble techniques
-- Web interface for predictions
-- Model interpretability (SHAP values)
-
-## References
-
-- **IoT-23 Dataset**: https://www.stratosphereips.org/datasets-iot23
-- **Paper**: "A Labeled Dataset with Malicious and Benign IoT Network Traffic"
-
-## License
-
-[Add your license here]
-
-## Contact
 
 [Add your contact information]
