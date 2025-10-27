@@ -42,7 +42,7 @@ print("="*80)
 print("TRAINING MODELS")
 print("="*80)
 
-# Train a Random Forest model
+# --------Train a Random Forest model----------
 print("\nTraining Random Forest...")
 clf = RandomForestClassifier(n_estimators=100, random_state=42)
 clf.fit(X_train, y_train)
@@ -67,7 +67,7 @@ feature_importance_df = pd.DataFrame({
 print("\nFeature Importance:")
 print(feature_importance_df.head(10))
 
-# Train a Gradient Boosting model
+# ----------Train a Gradient Boosting model----------
 print("\nTraining Gradient Boosting...")
 gb_clf = GradientBoostingClassifier(n_estimators=100, random_state=42)
 gb_clf.fit(X_train, y_train)
@@ -83,7 +83,7 @@ print(confusion_matrix(y_test, gb_y_pred))
 gb_accuracy = accuracy_score(y_test, gb_y_pred)
 print(f"Gradient Boosting Accuracy: {gb_accuracy:.2f}")
 
-# XGBoost section - Add Label Encoding
+# ----------XGBoost section - Add Label Encoding----------
 print("\nTraining XGBoost...")
 xgb = XGBClassifier(n_estimators=200, max_depth=6, learning_rate=0.1, random_state=42, eval_metric='mlogloss')
 
@@ -103,7 +103,7 @@ print(confusion_matrix(y_test, y_pred_xgb))
 xgb_accuracy = accuracy_score(y_test, y_pred_xgb)
 print(f"XGBoost Accuracy: {xgb_accuracy:.2f}")
 
-# Train a simple Neural Network (MLP) with scaling
+# ----------Train a simple Neural Network (MLP) with scaling----------
 print("\nTraining MLP...")
 scaler = StandardScaler()
 
@@ -301,7 +301,7 @@ plt.grid(True, alpha=0.3)
 plt.savefig('plots/roc_curves.png', dpi=300, bbox_inches='tight')
 plt.close()
 
-# 7. Decision Tree Visualization (from your original code)
+# 7. Decision Tree Visualization
 print("7. Creating decision tree visualization...")
 estimator = clf.estimators_[0]
 plt.figure(figsize=(20, 10))
