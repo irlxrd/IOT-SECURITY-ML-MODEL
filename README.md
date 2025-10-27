@@ -1,6 +1,7 @@
 # Network Traffic Classification using Machine Learning
 
 This project implements machine learning models to classify network traffic into different attack types using the IoT-23 dataset.
+Streamlit demo: https://intrusiondetectioniot.streamlit.app/
 
 ## Project Overview
 
@@ -138,4 +139,3 @@ The models use network flow features including:
 Categorical features (`proto`, `state`) are one-hot encoded, and missing values are handled appropriately.
 
 
-[Add your contact information]
