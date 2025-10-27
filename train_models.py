@@ -127,6 +127,45 @@ print("\n" + "="*80)
 print("GENERATING VISUALIZATIONS")
 print("="*80)
 
+
+# ----------Train Logistic Regression with scaling----------
+print("\nTraining Logistic Regression...")
+from sklearn.linear_model import LogisticRegression
+
+# Use the same scaled data as MLP
+lr = LogisticRegression(
+    multi_class='multinomial',  # For multiclass classification
+    solver='lbfgs',             # Good for multiclass problems
+    max_iter=1000,              # Ensure convergence
+    random_state=42,
+    C=1.0                       # Regularization strength
+)
+
+lr.fit(X_train_scaled, y_train)
+
+# Predict and evaluate Logistic Regression
+y_pred_lr = lr.predict(X_test_scaled)
+y_pred_lr_proba = lr.predict_proba(X_test_scaled)
+
+print("\nLogistic Regression Classification Report:")
+print(classification_report(y_test, y_pred_lr))
+print("Logistic Regression Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred_lr))
+lr_accuracy = accuracy_score(y_test, y_pred_lr)
+print(f"Logistic Regression Accuracy: {lr_accuracy:.2f}")
+
+# Extract coefficients for interpretation
+print("\nLogistic Regression Top Coefficients by Class:")
+for i, class_name in enumerate(lr.classes_):
+    coef_df = pd.DataFrame({
+        'Feature': X.columns,
+        'Coefficient': lr.coef_[i]
+    }).sort_values(by='Coefficient', key=abs, ascending=False).head(10)
+    
+    print(f"\n{class_name} - Top Positive/Negative Features:")
+    print(coef_df.head(5))
+
+
 # 1. Feature Importance Comparison
 print("\n1. Creating feature importance comparison plot...")
 fig, axes = plt.subplots(2, 2, figsize=(20, 16))
@@ -169,7 +208,8 @@ accuracies = {
     'Random Forest': rf_accuracy,
     'Gradient Boosting': gb_accuracy,
     'XGBoost': xgb_accuracy,
-    'MLP': mlp_accuracy
+    'MLP': mlp_accuracy,
+    'Logistic Regression': lr_accuracy  # Added
 }
 
 plt.figure(figsize=(10, 6))
@@ -188,23 +228,43 @@ plt.close()
 
 # 3. Confusion Matrix Heatmaps
 print("3. Creating confusion matrix heatmaps...")
-fig, axes = plt.subplots(2, 2, figsize=(16, 14))
 
 models = [
     ('Random Forest', y_pred),
     ('Gradient Boosting', gb_y_pred),
     ('XGBoost', y_pred_xgb),
-    ('MLP', y_pred_mlp)
+    ('MLP', y_pred_mlp),
+    ('Logistic Regression', y_pred_lr)  # Added
 ]
 
+# Create appropriate subplot grid based on number of models
+n_models = len(models)
+n_cols = 3  # 3 columns for better layout
+n_rows = (n_models + n_cols - 1) // n_cols  # Calculate rows needed
+
+fig, axes = plt.subplots(n_rows, n_cols, figsize=(6*n_cols, 5*n_rows))
+
+# If only one row, make axes 2D for consistent indexing
+if n_rows == 1:
+    axes = axes.reshape(1, -1)
+
 for idx, (name, predictions) in enumerate(models):
+    row = idx // n_cols
+    col = idx % n_cols
+    
     cm = confusion_matrix(y_test, predictions)
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
                 xticklabels=clf.classes_, yticklabels=clf.classes_,
-                ax=axes[idx // 2, idx % 2], cbar_kws={'label': 'Count'})
-    axes[idx // 2, idx % 2].set_title(f'{name} Confusion Matrix', fontsize=12, fontweight='bold')
-    axes[idx // 2, idx % 2].set_ylabel('True Label', fontsize=10)
-    axes[idx // 2, idx % 2].set_xlabel('Predicted Label', fontsize=10)
+                ax=axes[row, col], cbar_kws={'label': 'Count'})
+    axes[row, col].set_title(f'{name} Confusion Matrix', fontsize=12, fontweight='bold')
+    axes[row, col].set_ylabel('True Label', fontsize=10)
+    axes[row, col].set_xlabel('Predicted Label', fontsize=10)
+
+# Hide any unused subplots
+for idx in range(n_models, n_rows * n_cols):
+    row = idx // n_cols
+    col = idx % n_cols
+    axes[row, col].set_visible(False)
 
 plt.tight_layout()
 plt.savefig('plots/confusion_matrices.png', dpi=300, bbox_inches='tight')
@@ -213,7 +273,15 @@ plt.close()
 # 4. Per-Class Performance Metrics
 print("4. Creating per-class performance metrics plot...")
 metrics_data = []
-for name, predictions in models:
+models_with_lr = [
+    ('Random Forest', y_pred),
+    ('Gradient Boosting', gb_y_pred),
+    ('XGBoost', y_pred_xgb),
+    ('MLP', y_pred_mlp),
+    ('Logistic Regression', y_pred_lr)
+]
+
+for name, predictions in models_with_lr:
     precision, recall, f1, _ = precision_recall_fscore_support(y_test, predictions, average=None)
     for idx, class_name in enumerate(clf.classes_):
         metrics_data.append({
@@ -227,18 +295,34 @@ for name, predictions in models:
 metrics_df = pd.DataFrame(metrics_data)
 
 # Plot grouped bar chart
-fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+fig, axes = plt.subplots(1, 3, figsize=(20, 6))  # Slightly wider to accommodate 5 models
 metrics = ['Precision', 'Recall', 'F1-Score']
+
+# Define colors for each model for consistency
+model_colors = {
+    'Random Forest': '#1f77b4',
+    'Gradient Boosting': '#ff7f0e', 
+    'XGBoost': '#2ca02c',
+    'MLP': '#d62728',
+    'Logistic Regression': '#9467bd'  # Purple for Logistic Regression
+}
 
 for idx, metric in enumerate(metrics):
     pivot_df = metrics_df.pivot(index='Class', columns='Model', values=metric)
-    pivot_df.plot(kind='bar', ax=axes[idx])
+    
+    # Plot with specific colors
+    pivot_df.plot(kind='bar', ax=axes[idx], color=[model_colors[model] for model in pivot_df.columns])
+    
     axes[idx].set_title(f'{metric} by Class', fontsize=12, fontweight='bold')
     axes[idx].set_ylabel(metric, fontsize=10)
     axes[idx].set_xlabel('Class', fontsize=10)
-    axes[idx].legend(title='Model', loc='lower right')
+    axes[idx].legend(title='Model', loc='lower right', fontsize=8)  # Smaller font for 5 models
     axes[idx].set_ylim([0, 1.1])
     axes[idx].grid(axis='y', alpha=0.3)
+    
+    # Rotate x-axis labels if there are many classes
+    if len(pivot_df.index) > 5:
+        axes[idx].tick_params(axis='x', rotation=45)
 
 plt.tight_layout()
 plt.savefig('plots/per_class_metrics.png', dpi=300, bbox_inches='tight')
@@ -272,34 +356,42 @@ def plot_learning_curve(estimator, title, X, y, cv=5):
 
 plot_learning_curve(clf, 'Random Forest Learning Curve', X_train, y_train)
 
-# 6. ROC Curves (Multiclass)
-print("6. Creating ROC curves plot...")
-# Binarize labels for multiclass ROC
-y_test_bin = label_binarize(y_test, classes=clf.classes_)
-n_classes = y_test_bin.shape[1]
 
-# Get probability predictions
-y_score = clf.predict_proba(X_test)
+# Detailed Logistic Regression Coefficients (Optional)
+print("\n1A. Creating detailed logistic regression coefficients plot...")
 
-# Compute ROC curve for each class
-plt.figure(figsize=(10, 8))
-colors = cycle(['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray'])
-for i, color in zip(range(n_classes), colors):
-    fpr, tpr, _ = roc_curve(y_test_bin[:, i], y_score[:, i])
-    roc_auc = auc(fpr, tpr)
-    plt.plot(fpr, tpr, color=color, lw=2,
-             label=f'{clf.classes_[i]} (AUC = {roc_auc:.2f})')
+# Get the most influential features across all classes
+fig, axes = plt.subplots(2, 2, figsize=(20, 16))
+class_indices = range(min(4, len(lr.classes_)))  # Show first 4 classes max
 
-plt.plot([0, 1], [0, 1], 'k--', lw=2, label='Random Classifier')
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.05])
-plt.xlabel('False Positive Rate', fontsize=12)
-plt.ylabel('True Positive Rate', fontsize=12)
-plt.title('ROC Curves - Random Forest (One-vs-Rest)', fontsize=14, fontweight='bold')
-plt.legend(loc="lower right", fontsize=9)
-plt.grid(True, alpha=0.3)
-plt.savefig('plots/roc_curves.png', dpi=300, bbox_inches='tight')
+for idx, class_idx in enumerate(class_indices):
+    class_name = lr.classes_[class_idx]
+    
+    # Get coefficients for this class
+    coef_df = pd.DataFrame({
+        'Feature': X.columns,
+        'Coefficient': lr.coef_[class_idx]
+    }).sort_values(by='Coefficient', ascending=False)
+    
+    # Take top positive and negative coefficients
+    top_pos = coef_df.head(top_n//2)
+    top_neg = coef_df.tail(top_n//2)
+    top_coef = pd.concat([top_pos, top_neg])
+    
+    # Create horizontal bar plot with colors
+    colors = ['green' if x > 0 else 'red' for x in top_coef['Coefficient']]
+    bars = axes[idx//2, idx%2].barh(top_coef['Feature'], top_coef['Coefficient'], color=colors, alpha=0.7)
+    
+    axes[idx//2, idx%2].set_title(f'LR Coefficients: {class_name}', fontsize=12, fontweight='bold')
+    axes[idx//2, idx%2].axvline(x=0, color='black', linestyle='-', alpha=0.3)
+    axes[idx//2, idx%2].set_xlabel('Coefficient Value')
+    axes[idx//2, idx%2].invert_yaxis()
+
+
+plt.tight_layout()
+plt.savefig('plots/logistic_regression_detailed_coefficients.png', dpi=300, bbox_inches='tight')
 plt.close()
+
 
 # 7. Decision Tree Visualization
 print("7. Creating decision tree visualization...")
