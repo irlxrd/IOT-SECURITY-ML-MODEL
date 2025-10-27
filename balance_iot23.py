@@ -3,29 +3,11 @@ import numpy as np
 import glob
 import os
 
-"""This code will collect each C&C related sample from all datasets, which after there will be approximately 57k C&C samples.
+"""This code will collect each C&C related sample from all iot23  sub-datasets, which after there will be approximately 57k C&C samples.
 It will also collect DDos, Benign, PortScan and Okiru samples from specific files to have a balanced dataset."""
 
-"""file names:
-CTU-IoT-Malware-Capture-34-1 (Mirai) -> 34.1.labeled
-CTU-IoT-Malware-Capture-43-1 (Mirai) -> 43.1.labeled
-CTU-IoT-Malware-Capture-44-1 (Mirai) -> 44.1.labeled
-CTU-IoT-Malware-Capture-49-1 (Mirai) -> 49.1.labeled
-CTU-IoT-Malware-Capture-52-1 (Mirai) -> 52.1.labeled
-CTU-IoT-Malware-Capture-20-1 (Torii) -> 20.1.labeled
-CTU-IoT-Malware-Capture-21-1 (Torii) -> 21.1.labeled
-CTU-IoT-Malware-Capture-42-1 (Trojan) -> 42.1.labeled
-CTU-IoT-Malware-Capture-60-1 (Gagfyt) -> 60.1.labeled
-CTU-IoT-Malware-Capture-17-1 (Kenjiro) -> 17.1.labeled
-CTU-IoT-Malware-Capture-36-1 (Okiru) -> 36.1.labeled
-CTU-IoT-Malware-Capture-33-1 (Kenjiro) -> 33.1.labeled
-CTU-IoT-Malware-Capture-8-1 (Hakai) -> 8.1.labeled
-CTU-IoT-Malware-Capture-35-1 (Mirai) -> 35.1.labeled
-CTU-IoT-Malware-Capture-48-1 (Mirai) -> 48.1.labeled
 
-
-"""
-# C&C-related labels to map to 'C&C'
+# C&C-related labels mapped to 'C&C'
 cnc_labels = [
     "C&C",
     "C&C-FileDownload",
@@ -44,7 +26,7 @@ LABEL_MAP.update({
     "Okiru": "Okiru"
 })
 
-TARGET_SAMPLES = 50000
+TARGET_SAMPLES = 55000
 
 def balanced_sample(df, label, n):
     subset = df[df['label'] == label]
@@ -72,7 +54,7 @@ def parse_log(filename, selected_cols, rename_map):
         row['label'] = LABEL_MAP.get(orig_label, orig_label)
         data_rows.append(row)
     df = pd.DataFrame(data_rows)
-    # Select and rename columns early for efficiency
+    # Select and rename columns
     available_cols = [col for col in selected_cols if col in df.columns]
     df = df[available_cols]
     df = df.rename(columns=rename_map)
