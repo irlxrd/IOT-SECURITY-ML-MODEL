@@ -117,14 +117,6 @@ All models achieve near-perfect classification accuracy (>99%) due to:
 - Distinct feature patterns between attack types
 - High-quality labeled data from IoT-23
 
-### Typical Results
-
-| Model | Accuracy |
-|-------|----------|
-| Random Forest | ~100% |
-| Gradient Boosting | ~100% |
-| XGBoost | ~100% |
-| MLP | ~98-99% |
 
 ## Features
 
