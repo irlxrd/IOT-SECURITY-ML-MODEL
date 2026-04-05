@@ -109,14 +109,6 @@ Edit `train_models.py` to:
 - Modify feature engineering
 - Change visualization settings
 
-## Model Performance
-
-All models achieve near-perfect classification accuracy (>99%) due to:
-
-- Well-balanced dataset
-- Distinct feature patterns between attack types
-- High-quality labeled data from IoT-23
-
 
 ## Features
 
